@@ -65,7 +65,7 @@ TOKEN: { /* Keywords */
 }
 
 
-TOKEN: {    /* Punctuation */
+TOKEN: { /* Punctuation */
 
     < COMMA : "," >
     | < SEMICOLON : ";" >
