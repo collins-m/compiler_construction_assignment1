@@ -1,0 +1,296 @@
+PARSER_BEGIN(FrontEnd)
+
+    public class FrontEnd {
+
+        public static void main(String[] args){
+
+            FrontEnd parser;
+
+            if (args.length == 0) {
+
+                System.out.println("FrontEnd Parser: Reading from standard input . . .");
+                parser = new FrontEnd(System.in);
+                } else if (args.length == 1) {
+
+                    System.out.println("FrontEnd Parser: Reading from file " + args[0] + " . . .");
+                    try {
+
+                        parser = new FrontEnd(new java.io.FileInputStream(args[0]));
+                    } catch (java.io.FileNotFoundException e) {
+
+                        System.out.println("FrontEnd Parser: File " + args[0] + " not found.");
+
+                    return;
+                }
+            } else {
+
+                    System.out.println("FrontEnd Parser: Usage is one of:");
+                    System.out.println(" java FrontEndParser < inputfile");
+                    System.out.println("OR");
+                    System.out.println(" java FrontEndParser inputfile");
+
+                    return;
+            }
+            try {
+
+                parser.Program();
+                System.out.println("SLP Parser: SLP program parsed successfully.");
+                } catch (ParseException e) {
+
+                System.out.println(e.getMessage());
+                System.out.println("SLP Parser: Encountered errors during parse.");
+            }
+        }
+    }
+
+PARSER_END(FrontEnd)
+
+/*Tokens*/
+
+TOKEN: { /* Keywords */
+
+    < VAR : "var" >
+    | < CONST : "const" >
+    | < RETURN : "return" >
+    | < BOOLEAN : "boolean" >
+    | < VOID : "void" >
+    | < MAIN : "main" >
+    | < IF : "if" >
+    | < ELSE : "else" >
+    | < TRUE : "true" >
+    | < FALSE : "false" >
+    | < WHILE : "while" >
+    | < SKP : "skip" >
+    | < INTEGER : "integer">
+}
+
+
+TOKEN: {    /* Punctuation */
+
+    < COMMA : "," >
+    | < SEMICOLON : ";" >
+    | < COLON : ":" >
+    | < ASSIGN : "=" >
+    | < LEFT_BRACE : "{" >
+    | < RIGHT_BRACE : "}" >
+    | < LEFT_PARENTHESIS : "(" >
+    | < RIGHT_PARENTHESIS : ")" >
+    | < PLUS_SIGN : "+" >
+    | < MINUS_SIGN : "-" >
+    | < TILDE : "~" >
+    | < OR : "||" >
+    | < AND : "&&" >
+    | < EQUIVALENT : "==" >
+    | < NOTEQUIVALENT : "!=" >
+    | < LESS_THAN : "<" >
+    | < GREATER_THAN : ">" >
+    | < LESS_THAN_EQUAL : "<=" >
+    | < GREATER_THAN_EQUAL : ">=" >
+}
+
+
+TOKEN: { /* Numbers and identifiers */
+
+      < #DIGIT : ["0"-"9"] >
+    | < #CHAR : ["a"-"z", "A"-"Z"] >
+    | < NUMBER : ("-")* ["1"-"9"] (<DIGIT>)* | "0" >
+    | < ID : <CHAR> (<CHAR>| "_" | <DIGIT>)* >
+}
+
+
+TOKEN_MGR_DECLS : {
+
+    static int commentNesting = 0;
+}
+
+
+SKIP : { /*Ignore whitespaces*/
+
+     " "
+    | "\t"
+    | "\n"
+    | "\f"
+    | "\r"
+}
+
+
+SKIP : {
+
+    < "//" ([" " - "~"])* ("\n" | "\r" | "\r\n") >
+    | "/*" { commentNesting++; } : IN_COMMENT
+}
+
+
+<IN_COMMENT> SKIP : {
+
+      "/*" {commentNesting++; }
+    | "*/" {commentNesting--;
+            if (commentNesting == 0)
+                SwitchTo(DEFAULT);
+            }
+    | <~[]>
+}
+
+
+void Program(): {} {
+
+    DeclList() FunctionList() Main() <EOF>
+}
+
+
+void DeclList(): {} {
+
+    Decl() <SEMICOLON> DeclList()
+    | {}
+}
+
+
+void Decl(): {} {
+
+    VarDecl()
+    | ConstDecl()
+}
+
+
+void VarDecl(): {} {
+
+    <VAR> <ID> <COLON> Type()
+}
+
+
+void ConstDecl(): {} {
+
+    <CONST> <ID> <COLON> Type() <ASSIGN> Expression()
+}
+
+
+void FunctionList(): {} {
+
+    Function() FunctionList()
+    | {}
+}
+
+
+void Function(): {} {
+
+    Type() <ID> <LEFT_PARENTHESIS> ParameterList() <RIGHT_PARENTHESIS>
+    <LEFT_BRACE>
+    DeclList() StatementBlock()
+    <RETURN> <LEFT_PARENTHESIS> (Expression() | {}) <RIGHT_PARENTHESIS> <SEMICOLON>
+    <RIGHT_BRACE>
+}
+
+
+void Type(): {} {
+
+    <INTEGER>
+    | <BOOLEAN>
+    | <VOID>
+}
+
+
+void ParameterList(): {} {
+
+    NempParameterList()
+    | {}
+}
+
+
+void NempParameterList(): {} {
+
+    <ID> <COLON> Type() (<COMMA> NempParameterList() | {})
+}
+
+
+void Main(): {} {
+
+    <MAIN> <LEFT_BRACE>
+    DeclList() StatementBlock()
+    <RIGHT_BRACE>
+}
+
+
+void StatementBlock(): {} {
+
+    (Statement() StatementBlock())
+    | {}
+}
+
+
+void Statement(): {} {
+
+    <ID> (<ASSIGN> Expression() <SEMICOLON> | <LEFT_PARENTHESIS> ArgList() <RIGHT_PARENTHESIS> <SEMICOLON>)
+    | <LEFT_BRACE> StatementBlock() <RIGHT_BRACE>
+    | <IF> Condition() <LEFT_BRACE> StatementBlock() <RIGHT_BRACE> <ELSE> <LEFT_BRACE> StatementBlock() <RIGHT_BRACE>
+    | <WHILE> Condition() <LEFT_BRACE> StatementBlock() <RIGHT_BRACE>
+    | <SKP> <SEMICOLON>
+}
+
+
+void Expression(): {} {
+
+     Fragment() (BinaryArithOp() Fragment() | {})
+    | <LEFT_PARENTHESIS> Expression() <RIGHT_PARENTHESIS>
+}
+
+
+void BinaryArithOp(): {} {
+
+    <PLUS_SIGN>
+    | <MINUS_SIGN>
+}
+
+
+void Fragment(): {} {
+
+    (<MINUS_SIGN> | {}) <ID> (<LEFT_PARENTHESIS> ArgList() <RIGHT_PARENTHESIS> | {}) FragmentPrime()
+    | <NUMBER> FragmentPrime()
+    | <TRUE> FragmentPrime()
+    | <FALSE> FragmentPrime()
+}
+
+
+void FragmentPrime(): {} {
+
+    BinaryArithOp() Expression() FragmentPrime()
+    | {}
+}
+
+
+void Condition(): {} {
+
+     <TILDE> Condition() ConditionPrime()
+    | <LEFT_PARENTHESIS> Condition() <RIGHT_PARENTHESIS> ConditionPrime()
+    | Fragment() CompOp() Expression() ConditionPrime()
+}
+
+
+void ConditionPrime(): {} {
+
+    (<OR> | <AND>) Condition() ConditionPrime()
+    | {}
+}
+
+
+void CompOp(): {} {
+
+    <EQUIVALENT>
+    | <NOTEQUIVALENT>
+    | <LESS_THAN>
+    | <LESS_THAN_EQUAL>
+    | <GREATER_THAN>
+    | <GREATER_THAN_EQUAL>
+}
+
+
+void ArgList(): {} {
+
+    NempArgList()
+    | {}
+}
+
+
+void NempArgList(): {} {
+
+    <ID> (<COMMA> NempArgList() | {})
+}
