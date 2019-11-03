@@ -191,14 +191,14 @@ void Type(): {} {
 
 void ParameterList(): {} {
 
-    NempParameterList()
+    Parameter() (<COMMA> Parameter() | {})
     | {}
 }
 
 
-void NempParameterList(): {} {
+void Parameter(): {} {
 
-    <ID> <COLON> Type() (<COMMA> NempParameterList() | {})
+    <ID> <COLON> Type()
 }
 
 
@@ -285,12 +285,12 @@ void CompOp(): {} {
 
 void ArgList(): {} {
 
-    NempArgList()
+    NewArgList()
     | {}
 }
 
 
-void NempArgList(): {} {
+void NewArgList(): {} {
 
-    <ID> (<COMMA> NempArgList() | {})
+    <ID> (<COMMA> NewArgList() | {})
 }

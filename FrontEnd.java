@@ -166,29 +166,29 @@
   static final public void ParameterList() throws ParseException {
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case ID:{
-      NempParameterList();
-      break;
+      Parameter();
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case COMMA:{
+        jj_consume_token(COMMA);
+        Parameter();
+        break;
+        }
+      default:
+        jj_la1[5] = jj_gen;
+
       }
-    default:
-      jj_la1[5] = jj_gen;
-
-    }
-  }
-
-  static final public void NempParameterList() throws ParseException {
-    jj_consume_token(ID);
-    jj_consume_token(COLON);
-    Type();
-    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-    case COMMA:{
-      jj_consume_token(COMMA);
-      NempParameterList();
       break;
       }
     default:
       jj_la1[6] = jj_gen;
 
     }
+  }
+
+  static final public void Parameter() throws ParseException {
+    jj_consume_token(ID);
+    jj_consume_token(COLON);
+    Type();
   }
 
   static final public void Main() throws ParseException {
@@ -492,7 +492,7 @@
   static final public void ArgList() throws ParseException {
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case ID:{
-      NempArgList();
+      NewArgList();
       break;
       }
     default:
@@ -501,12 +501,12 @@
     }
   }
 
-  static final public void NempArgList() throws ParseException {
+  static final public void NewArgList() throws ParseException {
     jj_consume_token(ID);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case COMMA:{
       jj_consume_token(COMMA);
-      NempArgList();
+      NewArgList();
       break;
       }
     default:
@@ -533,10 +533,10 @@
       jj_la1_init_1();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x6,0x6,0x2030,0x900600,0x2030,0x0,0x4000,0x41880,0x120000,0x41880,0xc00000,0x900600,0xc00000,0x800000,0x100000,0x800600,0xc00000,0x1900600,0x6000000,0x6000000,0xf8000000,0x0,0x4000,};
+      jj_la1_0 = new int[] {0x6,0x6,0x2030,0x900600,0x2030,0x4000,0x0,0x41880,0x120000,0x41880,0xc00000,0x900600,0xc00000,0x800000,0x100000,0x800600,0xc00000,0x1900600,0x6000000,0x6000000,0xf8000000,0x0,0x4000,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0x0,0x0,0x0,0x18,0x0,0x10,0x0,0x10,0x0,0x10,0x0,0x18,0x0,0x0,0x0,0x18,0x0,0x18,0x0,0x0,0x1,0x10,0x0,};
+      jj_la1_1 = new int[] {0x0,0x0,0x0,0x18,0x0,0x0,0x10,0x10,0x0,0x10,0x0,0x18,0x0,0x0,0x0,0x18,0x0,0x18,0x0,0x0,0x1,0x10,0x0,};
    }
 
   /** Constructor with InputStream. */
